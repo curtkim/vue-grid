@@ -61,6 +61,10 @@
           <td class="pv1a pr2 b ttu mid-gray bb b--black-10" style="font-size: 11px" colspan="2"><div class="mt2">Calculated Values</div></td>
         </tr>
         <tr>
+          <td class="pv1a pr2">start:</td>
+          <td class="pv1a pl2 tr"><grid-metrics-value :val="metrics.start"></grid-metrics-value></td>
+        </tr>
+        <tr>
           <td class="pv1a pr2">Rendered row count:</td>
           <td class="pv1a pl2 tr"><grid-metrics-value :val="metrics.rendered_row_count"></grid-metrics-value></td>
         </tr>

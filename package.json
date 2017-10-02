@@ -1,5 +1,5 @@
 {
-  "name": "vue-grid2",
+  "name": "vue-grid2-static",
   "version": "0.2.9",
   "description": "A flexible grid component for Vue.js",
   "author": "David Z. Williams <dave@flex.io>",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dzwillia/vue-grid.git"
+    "url": "git+https://github.com/curtkim/vue-grid"
   },
   "keywords": [
     "vue",

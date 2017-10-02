@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-row overflow-hidden">
     <div class="flex-fill br b--black-20">
+      <!-- data-url="data.json"-->
       <grid
-        data-url="https://www.flex.io/api/v1/streams/n4gz56kdxm7y/content"
-        :custom-headers="{ 'Authorization': 'Bearer kmzdxtzwybzyqrqjbrnm' }"
+        :data="data"
         :live-scroll="live_scroll"
         @metrics-change="onGridMetricsChange"
       ></grid>
@@ -27,6 +27,7 @@
   import GridMetrics from './GridMetrics.vue'
   import GridEvents from './GridEvents.vue'
   import GridOptions from './GridOptions.vue'
+  import sample from '../src/data/simple'
 
   export default {
     components: {
@@ -38,7 +39,8 @@
     data() {
       return {
         metrics: {},
-        live_scroll: false
+        live_scroll: false,
+        data: sample,
       }
     },
     methods: {

@@ -103,6 +103,10 @@
   export default {
     name: 'vue-grid',
     props: {
+      'data': {
+        type: Object,
+        default: null
+      },
       'data-url': {
         type: String,
         default: ''
@@ -411,6 +415,8 @@
       //this.scrollVerticalThrottled = _.debounce(this.scrollVertical, 5, { leading: false, trailing: true })
       this.scrollVerticalThrottled = _.throttle(this.scrollVertical, 5, { leading: false, trailing: true })
 
+      if( this.data )
+        this._thenResponse(this.data, this.start, this.limit)
       // do our initial fetch
       this.tryFetch()
 
@@ -459,6 +465,38 @@
         var url = this.dataUrl+'?start='+start+'&limit='+limit
         return this.inited ? url : url + '&metadata=true'
       },
+      _thenResponse(resdata, fetch_start, fetch_limit){
+        if (_.isNumber(resdata.total_count))
+          this.total_row_count = resdata.total_count
+
+        // store our column info
+        if (!this.inited && _.isArray(resdata.columns))
+        {
+          // include default column info with each column
+          var temp_cols = _.map(resdata.columns, (col) => {
+            return _.assign({ pixel_width: DEFAULT_COLUMN_WIDTH }, col)
+          })
+
+          this.columns = [].concat(temp_cols)
+        }
+
+        // store the current set of rows
+        this.rows = resdata.rows.slice(0, fetch_limit)
+
+        // cache the current set of rows
+        var temp_cached_rows = {}
+        for (var i = 0; i < resdata.rows.length; i++)
+          temp_cached_rows[fetch_start+i] = resdata.rows[i]
+
+        // add the temporary cached rows to our stored cached rows
+        this.cached_rows = _.assign({}, this.cached_rows, temp_cached_rows)
+        // set our init flag to true so we don't get columns after this
+        this.inited = true
+
+        // reset XHR variables
+        this.active_xhr = null
+        this.cancelXhr = null
+      },
       tryFetch() {
         var me = this
 
@@ -489,49 +527,7 @@
             // an executor function receives a cancel function as a parameter
             me.cancelXhr = c
           })
-        }).then(response => {
-          var resdata = response.data
-
-          if (_.isNumber(resdata.total_count))
-            this.total_row_count = resdata.total_count
-
-          // store our column info
-          if (!this.inited && _.isArray(resdata.columns))
-          {
-            // include default column info with each column
-            var temp_cols = _.map(resdata.columns, (col) => {
-              return _.assign({ pixel_width: DEFAULT_COLUMN_WIDTH }, col)
-            })
-
-            this.columns = [].concat(temp_cols)
-          }
-
-          // store the current set of rows
-          this.rows = [].concat(resdata.rows)
-
-          // cache the current set of rows
-          var start = fetch_start
-          var limit = fetch_limit
-          var row_count = this.total_row_count
-          var temp_cached_rows = {}
-          var idx = 0
-
-          for (var r = start; r < start+limit && r < row_count; ++r)
-          {
-            temp_cached_rows[r] = this.rows[idx]
-            idx++
-          }
-
-          // add the temporary cached rows to our stored cached rows
-          this.cached_rows = _.assign({}, this.cached_rows, temp_cached_rows)
-
-          // set our init flag to true so we don't get columns after this
-          this.inited = true
-
-          // reset XHR variables
-          this.active_xhr = null
-          this.cancelXhr = null
-        })
+        }).then(response => this._thenResponse(response.data, fetch_start, fetch_limit))
       },
 
       onStartRowHandleResize(col) {
